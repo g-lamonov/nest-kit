@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
 import { UserRepository } from 'src/database/repositories/user.repository';
 import { LoginDto } from './dto/login-payload.dto';
 import { Builder } from 'src/utils/test-utils/builders';
@@ -8,12 +7,12 @@ import { Mock } from 'src/utils/test-utils/mocks';
 import { RegistrationDto } from './dto/registration-payload.dto';
 import { SessionRepository } from 'src/database/repositories/session.repository';
 import * as request from 'supertest';
-import { AppModule } from 'src/app.module';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
+import { AuthModule } from './auth.module';
+import { DatabaseModule } from 'src/database/database.module';
 
 describe('Auth module', () => {
   let app: INestApplication;
-  let controller: AuthController;
 
   let userRepository: UserRepository;
   let sessionRepository: SessionRepository;
@@ -22,13 +21,12 @@ describe('Auth module', () => {
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [DatabaseModule, AuthModule],
     }).compile();
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
 
-    controller = app.get(AuthController);
     userRepository = app.get(UserRepository);
     authService = app.get(AuthService);
     sessionRepository = app.get(SessionRepository);
@@ -48,15 +46,11 @@ describe('Auth module', () => {
         email: userData.email,
         password: userData.password,
       };
-      const result = await controller.login(body);
-
-      expect(result).toHaveProperty('accessToken');
-      expect(result).toHaveProperty('refreshToken');
 
       const res = await request(app.getHttpServer())
         .post('/v1/auth/sign-in')
         .send(body)
-        .expect(201);
+        .expect(HttpStatus.CREATED);
 
       expect(res.body.accessToken).toBeDefined();
       expect(res.body.refreshToken).toBeDefined();
@@ -71,7 +65,7 @@ describe('Auth module', () => {
       await request(app.getHttpServer())
         .post('/v1/auth/sign-in')
         .send(body)
-        .expect(400);
+        .expect(HttpStatus.UNAUTHORIZED);
     });
 
     it('should throw an error if password is incorrect', async () => {
@@ -83,7 +77,7 @@ describe('Auth module', () => {
       await request(app.getHttpServer())
         .post('/v1/auth/sign-in')
         .send(body)
-        .expect(400);
+        .expect(HttpStatus.UNAUTHORIZED);
     });
   });
 
@@ -97,7 +91,7 @@ describe('Auth module', () => {
       request(app.getHttpServer())
         .post('/v1/auth/sign-up')
         .send(body)
-        .expect(201);
+        .expect(HttpStatus.CREATED);
     });
 
     it('should throw an error if user already exists', async () => {
@@ -113,7 +107,7 @@ describe('Auth module', () => {
       await request(app.getHttpServer())
         .post('/v1/auth/sign-up')
         .send(body)
-        .expect(400);
+        .expect(HttpStatus.UNAUTHORIZED);
     });
   });
 
@@ -127,7 +121,7 @@ describe('Auth module', () => {
       const res = await request(app.getHttpServer())
         .post('/v1/auth/token/refresh')
         .set('Authorization', `Bearer ${tokens.refreshToken}`)
-        .expect(201);
+        .expect(HttpStatus.CREATED);
 
       expect(res.body.accessToken).toBeDefined();
       expect(res.body.refreshToken).toBeDefined();
@@ -137,7 +131,7 @@ describe('Auth module', () => {
       const res = await request(app.getHttpServer())
         .post('/v1/auth/token/refresh')
         .set('Authorization', 'Bearer invalid-token')
-        .expect(401);
+        .expect(HttpStatus.UNAUTHORIZED);
 
       expect(res.body.message).toEqual('Unauthorized');
     });

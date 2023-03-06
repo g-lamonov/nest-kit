@@ -1,27 +1,32 @@
+import * as request from 'supertest';
+import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { Builder } from 'src/utils/test-utils/builders';
 import { DatabaseModule } from '../../../database/database.module';
-import { UserEntity } from '../../../database/entity/user.entity';
 import { UserRepository } from '../../../database/repositories/user.repository';
-import { UsersController } from './users.controller';
-import { UsersService } from './users.service';
+import { AuthService } from '../auth/auth.service';
+import { UsersModule } from './users.module';
+import { AuthModule } from '../auth/auth.module';
+import { SessionRepository } from 'src/database/repositories/session.repository';
 
 describe('UsersController', () => {
-  let app: TestingModule;
-  let controller: UsersController;
+  let app: INestApplication;
 
   let repository: UserRepository;
+  let authService: AuthService;
+  let sessionRepository: SessionRepository;
 
   beforeEach(async () => {
-    app = await Test.createTestingModule({
-      imports: [DatabaseModule, TypeOrmModule.forFeature([UserEntity])],
-      controllers: [UsersController],
-      providers: [UsersService, UserRepository],
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [DatabaseModule, AuthModule, UsersModule],
     }).compile();
+    app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe());
+    await app.init();
 
-    controller = app.get<UsersController>(UsersController);
-    repository = app.get<UserRepository>(UserRepository);
+    repository = app.get(UserRepository);
+    sessionRepository = app.get(SessionRepository);
+    authService = app.get(AuthService);
   });
 
   afterEach(async () => {
@@ -30,13 +35,17 @@ describe('UsersController', () => {
 
   describe('POST /users/profile', () => {
     it('Should get profile', async () => {
-      const user = repository.create(Builder.User.generate());
-      await repository.save(user);
-      const response = await controller.profile({
-        user,
-      });
+      const userData = repository.create(Builder.User.generate());
+      const user = await repository.save(userData);
+      const session = await sessionRepository.createSession(user.id);
+      const tokens = await authService.createTokens(session.id);
 
-      expect(response.id).toBe(user.id);
+      const res = await request(app.getHttpServer())
+        .get('/v1/users/profile')
+        .set('Authorization', `Bearer ${tokens.accessToken}`)
+        .expect(HttpStatus.OK);
+
+      expect(res.body.id).toBe(user.id);
     });
   });
 });

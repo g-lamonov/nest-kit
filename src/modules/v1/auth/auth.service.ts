@@ -56,7 +56,7 @@ export class AuthService {
     if (!user || !(await user.passwordCompare(data.password)))
       throw new HttpException(
         AuthServiceErrors.WRONG_PASSWORD,
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNAUTHORIZED,
       );
 
     const session = await this._sessionRepository.createSession(user.id);
@@ -71,7 +71,7 @@ export class AuthService {
     if (user)
       throw new HttpException(
         AuthServiceErrors.USER_ALREADY_EXISTS,
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNAUTHORIZED,
       );
 
     user = this._userRepository.create(data);
