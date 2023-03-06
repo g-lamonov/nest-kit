@@ -1,6 +1,6 @@
 import { Controller, Get, Inject, Request, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { UserEntity } from 'src/app/database/entity/user.entity';
+import { UserEntity } from 'src/database/entity/user.entity';
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
 import { UsersService } from './users.service';
 

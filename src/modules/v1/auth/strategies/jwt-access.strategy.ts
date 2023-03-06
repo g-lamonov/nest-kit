@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import config from 'src/config/config';
-import { UserRepository } from 'src/app/database/repositories/user.repository';
+import { UserRepository } from 'src/database/repositories/user.repository';
 
 export interface JwtPayload {
   id: string;

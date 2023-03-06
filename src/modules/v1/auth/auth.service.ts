@@ -1,10 +1,8 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-
 import config from '../../../config/config';
-
-import { UserRepository } from 'src/app/database/repositories/user.repository';
-import { UserEntity } from 'src/app/database/entity/user.entity';
+import { UserRepository } from 'src/database/repositories/user.repository';
+import { UserEntity } from 'src/database/entity/user.entity';
 import { JwtPayload } from './strategies/jwt-access.strategy';
 import { RegistrationDto } from './dto/registration-payload.dto';
 import { LoginDto } from './dto/login-payload.dto';

@@ -1,7 +1,7 @@
 import helmet from 'helmet';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
-import { AppModule } from './app/app.module';
+import { AppModule } from './app.module';
 import config from './config/config';
 import swaggerConfig from './config/swagger.config';
 import { AppExceptionsFilter } from './filters/exceptions.filter';
