@@ -25,14 +25,12 @@ export class AppExceptionsFilter implements ExceptionFilter {
       exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
-    const httpResponse =
-      exception instanceof HttpException ? exception.getResponse() : '';
 
     const responseBody = {
       ok: false,
       statusCode: httpStatus,
       timestamp: new Date().toISOString(),
-      message: httpResponse,
+      message: (exception as { message: string })?.message,
     };
 
     httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);

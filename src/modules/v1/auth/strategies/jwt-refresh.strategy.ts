@@ -1,34 +1,30 @@
+import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { ExtractJwt, Strategy } from 'passport-jwt';
 import config from 'src/config/config';
-import { UserRepository } from 'src/database/repositories/user.repository';
+import { JwtPayload } from './jwt-access.strategy';
 import { SessionRepository } from 'src/database/repositories/session.repository';
+import { UserRepository } from 'src/database/repositories/user.repository';
 import { AuthServiceErrors } from '../auth.service';
 import { UserEntity } from 'src/database/entity/user.entity';
 
-export interface JwtPayload {
-  sessionId: string;
-}
-
 @Injectable()
-export default class JwtAccessStrategy extends PassportStrategy(
+export default class JwtRefreshStrategy extends PassportStrategy(
   Strategy,
-  'jwt-access',
+  'jwt-refresh',
 ) {
-  @Inject(UserRepository)
-  private _userRepository: UserRepository;
-
-  @Inject(SessionRepository)
-  private _sessionRepository: SessionRepository;
-
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: config.auth.jwt.access.secret,
+      secretOrKey: config.auth.jwt.refresh.secret,
     });
   }
+  @Inject(SessionRepository)
+  private readonly _sessionRepository: SessionRepository;
+
+  @Inject(UserRepository)
+  private readonly _userRepository: UserRepository;
 
   async validate(payload: JwtPayload): Promise<UserEntity> {
     const session = await this._sessionRepository.findById(payload.sessionId);
@@ -39,6 +35,7 @@ export default class JwtAccessStrategy extends PassportStrategy(
       );
 
     const user = await this._userRepository.findById(session.userId);
+
     if (!user)
       throw new HttpException(
         AuthServiceErrors.TOKEN_INVALID,

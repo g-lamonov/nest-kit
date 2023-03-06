@@ -5,12 +5,12 @@ import { UserEntity } from '../entity/user.entity';
 export class UserRepository extends Repository<UserEntity> {
   constructor(
     @InjectRepository(UserEntity)
-    private userRepository: Repository<UserEntity>,
+    private _userRepository: Repository<UserEntity>,
   ) {
     super(
-      userRepository.target,
-      userRepository.manager,
-      userRepository.queryRunner,
+      _userRepository.target,
+      _userRepository.manager,
+      _userRepository.queryRunner,
     );
   }
 
