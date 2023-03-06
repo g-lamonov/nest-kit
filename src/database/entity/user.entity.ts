@@ -8,6 +8,7 @@ import {
 
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
+import { UserRole } from 'src/enums';
 
 @Entity({
   name: 'users',
@@ -17,10 +18,10 @@ export class UserEntity {
   id: string = uuidv4();
 
   @Column({ nullable: true })
-  firstname: string;
+  firstName: string;
 
   @Column({ nullable: true })
-  lastname: string;
+  lastName: string;
 
   @Column()
   email: string;
@@ -29,6 +30,12 @@ export class UserEntity {
     select: false,
   })
   password: string;
+
+  @Column({
+    enum: UserRole,
+    default: UserRole.User,
+  })
+  role: UserRole;
 
   @BeforeInsert()
   @BeforeUpdate()
