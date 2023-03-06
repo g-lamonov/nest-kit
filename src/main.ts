@@ -1,3 +1,4 @@
+import helmet from 'helmet';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app/app.module';
@@ -31,6 +32,9 @@ async function bootstrap() {
     app,
     document,
   );
+
+  app.enableCors(config.server.cors);
+  app.use(helmet());
 
   await app.listen(3000);
 }
