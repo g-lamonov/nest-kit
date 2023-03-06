@@ -16,10 +16,10 @@ export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string = uuidv4();
 
-  @Column()
+  @Column({ nullable: true })
   firstname: string;
 
-  @Column()
+  @Column({ nullable: true })
   lastname: string;
 
   @Column()
