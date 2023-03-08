@@ -7,6 +7,7 @@ import { SessionRepository } from 'src/database/repositories/session.repository'
 import { UserRepository } from 'src/database/repositories/user.repository';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import JwtAccessStrategy from './strategies/jwt-access.strategy';
 import JwtRefreshStrategy from './strategies/jwt-refresh.strategy';
 
 @Module({
@@ -19,7 +20,9 @@ import JwtRefreshStrategy from './strategies/jwt-refresh.strategy';
     AuthService,
     UserRepository,
     SessionRepository,
+    JwtAccessStrategy,
     JwtRefreshStrategy,
   ],
+  exports: [AuthService, JwtAccessStrategy],
 })
 export class AuthModule {}

@@ -1,6 +1,6 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { config as dotenv } from 'dotenv';
-import * as entities from 'src/database/entity/entities';
+import { entities } from 'src/database/entity/entities';
 
 dotenv();
 
