@@ -9,11 +9,12 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from 'src/enums';
+import { AbstractEntity } from './abstract/abstract.entity';
 
 @Entity({
   name: 'users',
 })
-export class UserEntity {
+export class UserEntity extends AbstractEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string = uuidv4();
 
